@@ -1,0 +1,207 @@
+{% extends 'music/base.html' %}
+{% block title %}{{ song.title }} - Kiarash Music{% endblock %}
+
+{% block content %}
+<style>
+    .player-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        padding: 2rem;
+    }
+    .player-card {
+        background: #1e1e1e;
+        border-radius: 28px;
+        padding: 2.5rem 2rem 2rem;
+        width: 100%;
+        max-width: 480px;
+        box-shadow: 0 16px 48px rgba(0,0,0,0.7);
+        text-align: center;
+    }
+    .cover-art { font-size: 5rem; margin-bottom: 1rem; }
+    .track-info h2 { font-size: 1.5rem; color: #fff; margin-bottom: 0.3rem; font-weight: 600; }
+    .track-info p { color: #b3b3b3; font-size: 1rem; margin-bottom: 2rem; }
+    .album { color: #777; font-size: 0.85rem; margin-top: -1.8rem; margin-bottom: 1.5rem; }
+
+    .controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .ctrl-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: 2px solid #1db954;
+        background: transparent;
+        color: #1db954;
+        font-size: 2rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+    .ctrl-btn:hover {
+        background: #1db954;
+        color: #121212;
+        transform: scale(1.1);
+    }
+    .ctrl-btn.small {
+        width: 48px;
+        height: 48px;
+        font-size: 1.4rem;
+    }
+    .ctrl-btn.disabled {
+        opacity: 0.3;
+        cursor: default;
+        pointer-events: none;
+    }
+
+    .progress-wrapper { direction: ltr; margin-top: 0.5rem; }
+    .progress-bar {
+        position: relative;
+        height: 20px;
+        background: #2a2a2a;
+        border-radius: 10px;
+        overflow: hidden;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'%3E%3Cpath d='M0 10 Q12.5 0 25 10 T50 10 T75 10 T100 10' fill='none' stroke='%23444' stroke-width='2'/%3E%3C/svg%3E");
+        background-repeat: repeat-x;
+        background-size: 100px 20px;
+    }
+    .progress-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #1db954, #1ed760);
+        border-radius: 10px 0 0 10px;
+        transition: width 0.15s linear;
+    }
+    .time-row {
+        display: flex;
+        justify-content: space-between;
+        color: #aaa;
+        font-size: 0.85rem;
+        margin-top: 0.4rem;
+    }
+    audio { display: none; }
+</style>
+
+<div class="player-container">
+    <div class="player-card">
+        <div class="cover-art">🎶</div>
+        <div class="track-info">
+            <h2>{{ song.title }}</h2>
+            <p>{{ song.artist }}</p>
+            {% if song.album %}<p class="album">{{ song.album }}</p>{% endif %}
+        </div>
+
+        <!-- کنترل‌ها: قبلی | شروع مجدد | پخش | بعدی -->
+        <div class="controls">
+            {% if prev_song_id %}
+                <a href="{% url 'play_song' prev_song_id %}" class="ctrl-btn small" title="آهنگ قبلی">⏮️</a>
+            {% else %}
+                <span class="ctrl-btn small disabled" title="آهنگ قبلی">⏮️</span>
+            {% endif %}
+
+            <button id="restartBtn" class="ctrl-btn" title="شروع مجدد">↺</button>
+            <button id="playBtn" class="ctrl-btn" title="پخش و توقف">▶️</button>
+
+            {% if next_song_id %}
+                <a href="{% url 'play_song' next_song_id %}" class="ctrl-btn small" title="آهنگ بعدی">⏭️</a>
+            {% else %}
+                <span class="ctrl-btn small disabled" title="آهنگ بعدی">⏭️</span>
+            {% endif %}
+        </div>
+
+        <!-- نوار پیشرفت -->
+        <div class="progress-wrapper">
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="time-row"><span id="currentTime">00:00</span>
+                <span id="totalTime">00:00</span>
+            </div>
+        </div>
+
+        <audio id="audioPlayer" src="{% url 'stream_audio' song.id %}" preload="auto"></audio>
+    </div>
+</div>
+
+<script>
+(function() {
+    var audio = document.getElementById('audioPlayer');
+    var playBtn = document.getElementById('playBtn');
+    var restartBtn = document.getElementById('restartBtn');
+    var progressBar = document.getElementById('progressBar');
+    var progressFill = document.getElementById('progressFill');
+    var currentTimeEl = document.getElementById('currentTime');
+    var totalTimeEl = document.getElementById('totalTime');
+
+    if (!audio || !playBtn) {
+        console.error('عناصر پلیر پیدا نشدند');
+        return;
+    }
+
+    function formatTime(sec) {
+        if (isNaN(sec)) return '00:00';
+        var minutes = Math.floor(sec / 60);
+        var seconds = Math.floor(sec % 60);
+        if (minutes < 10) minutes = '0' + minutes;
+        if (seconds < 10) seconds = '0' + seconds;
+        return minutes + ':' + seconds;
+    }
+
+    audio.addEventListener('loadedmetadata', function() {
+        totalTimeEl.textContent = formatTime(audio.duration);
+    });
+
+    audio.addEventListener('timeupdate', function() {
+        if (audio.duration) {
+            var percent = (audio.currentTime / audio.duration) * 100;
+            progressFill.style.width = percent + '%';
+            currentTimeEl.textContent = formatTime(audio.currentTime);
+        }
+    });
+
+    playBtn.addEventListener('click', function() {
+        if (audio.paused) {
+            audio.play().then(function() {
+                playBtn.textContent = '⏸️';
+            }).catch(function(e) {
+                console.error('پخش ناموفق:', e);
+            });
+        } else {
+            audio.pause();
+            playBtn.textContent = '▶️';
+        }
+    });
+
+    restartBtn.addEventListener('click', function() {
+        audio.currentTime = 0;
+        if (audio.paused) {
+            audio.play().then(function() {
+                playBtn.textContent = '⏸️';
+            }).catch(function(e) {
+                console.error(e);
+            });
+        }
+    });
+
+    progressBar.addEventListener('click', function(e) {
+        var rect = progressBar.getBoundingClientRect();
+        var percent = (e.clientX - rect.left) / rect.width;
+        if (audio.duration && percent >= 0 && percent <= 1) {
+            audio.currentTime = percent * audio.duration;
+        }
+    });
+})();
+</script>
+{% endblock %}

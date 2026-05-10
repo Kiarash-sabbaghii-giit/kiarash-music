@@ -1,0 +1,40 @@
+={% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Kiarash Music{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'music/css/style.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="dark-theme">
+    <!-- هدر -->
+    <header class="header">
+        <div class="logo">
+            <a href="{% url 'home' %}">Kiarash Music</a>
+        </div>
+        <nav class="nav-right">
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="جستجوی آهنگ...">
+                <ul id="suggestions" class="suggestions"></ul>
+            </div>
+            {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}">خروج</a>
+                <span class="user-greeting">سلام {{ user.username }}</span>
+            {% else %}
+                <a href="{% url 'login' %}">ورود</a>
+                <a href="{% url 'register' %}">ثبت نام</a>
+            {% endif %}
+            <a href="{% url 'about' %}">درباره ما</a>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{% static 'music/js/search.js' %}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

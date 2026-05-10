@@ -1,0 +1,38 @@
+{% extends 'music/base.html' %}
+{% block title %}خانه - Kiarash Music{% endblock %}
+
+{% block content %}
+<div class="song-grid">
+    {% for song in page_obj %}
+        <a href="{% url 'play_song' song.id %}" class="song-card">
+            <div class="card-icon">🎵</div>
+            <div class="card-info">
+                <h3>{{ song.title }}</h3>
+                <p>{{ song.artist }}</p>
+                <span class="duration">{{ song.duration|floatformat:0 }} ثانیه</span>
+            </div>
+        </a>
+    {% empty %}
+        <p class="empty-msg">هنوز آهنگی اضافه نشده است.</p>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; اولین</a>
+            <a href="?page={{ page_obj.previous_page_number }}">قبلی</a>
+        {% endif %}
+
+        <span class="current">
+            صفحه {{ page_obj.number }} از {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">بعدی</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">آخرین &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+{% endblock %}
