@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
-MUSIC_FOLDER = str(BASE_DIR / 'musics')   # چون نام پوشه شما musics است
+MUSIC_FOLDER = str(BASE_DIR / 'musics')
 
 def main():
     """Run administrative tasks."""

@@ -6,7 +6,7 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/your-username/kiarash-music?color=1db954)
 ![GitHub License](https://img.shields.io/github/license/your-username/kiarash-music?color=1db954)
 
-> **"در زمان جنگ این برنامه را ساختم... زمانی که نیاز به آرامش بود و موسیقی تنها پناهگاه."**  
+> **"در زمان جنگ این برنامه را ساختم"**  
 > A lightweight, high-performance web music player built with Django.  
 > Inspired by SoundCloud and Samsung Music, optimized for low-resource systems.
 
@@ -30,7 +30,8 @@
 |-----------|-------------|
 | ![Home](screenshots/home.png) | ![Player](screenshots/player.png) |
 
-*(Add screenshots to the `screenshots/` folder)*
+## 🎥 Demo
+[Watch the demo video](screenshots/demo.mp4)
 
 ---
 
