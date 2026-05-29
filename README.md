@@ -1,12 +1,8 @@
 # 🎵 Kiarash Music
 
-![GitHub top language](https://img.shields.io/github/languages/top/your-username/kiarash-music?color=1db954)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/your-username/kiarash-music?color=1db954)
-![GitHub repo size](https://img.shields.io/github/repo-size/your-username/kiarash-music?color=1db954)
-![GitHub last commit](https://img.shields.io/github/last-commit/your-username/kiarash-music?color=1db954)
-![GitHub License](https://img.shields.io/github/license/your-username/kiarash-music?color=1db954)
 
-> **"در زمان جنگ این برنامه را ساختم . در نبود اینرتنت :)"**  
+
+> **"در زمان جنگ این برنامه را ساختم . در نبود اینترنت :)"**  
 > A lightweight, high-performance web music player built with Django.  
 > Inspired by SoundCloud and Samsung Music, optimized for low-resource systems.
 
